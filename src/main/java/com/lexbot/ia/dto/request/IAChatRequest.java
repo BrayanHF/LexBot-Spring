@@ -1,4 +1,4 @@
-package com.lexbot.ia.models;
+package com.lexbot.ia.dto.request;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +10,8 @@ import java.util.List;
 public class IAChatRequest {
 
     private String model;
-    private List<IAMessage> messages;
-    private int maxTokens;
+    private List<IAMessageRequest> messages;
+    private int max_tokens;
     private double temperature;
 
 }

@@ -1,6 +1,7 @@
 package com.lexbot.ia.services.impl;
 
-import com.lexbot.ia.models.IAChatRequest;
+import com.lexbot.ia.dto.request.IAChatRequest;
+import com.lexbot.ia.dto.response.IAChatResponse;
 import com.lexbot.ia.services.IAService;
 import com.lexbot.ia.web_client.WebClientFactory;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -17,7 +18,7 @@ public class OpenAIServiceImpl implements IAService {
     }
 
     @Override
-    public Mono<String> chat(IAChatRequest request) {
+    public Mono<IAChatResponse> chat(IAChatRequest request) {
         String OPENAI_API_KEY = Dotenv.load().get("OPENAI_API_KEY");
         var openAIWebClient = webClientFactory
             .createWebClient(
@@ -30,7 +31,7 @@ public class OpenAIServiceImpl implements IAService {
             .uri("/chat/completions")
             .bodyValue(request)
             .retrieve()
-            .bodyToMono(String.class);
+            .bodyToMono(IAChatResponse.class);
     }
 
 }
