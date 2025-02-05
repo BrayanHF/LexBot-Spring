@@ -32,6 +32,10 @@ dependencies {
     // For .env
     implementation 'io.github.cdimascio:dotenv-java:3.1.0'
 
+    // Firestore
+    // - Firebase
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
