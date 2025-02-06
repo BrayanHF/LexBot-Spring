@@ -2,7 +2,7 @@ package com.lexbot.ia.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum IARole {
+public enum Role {
 
     @JsonProperty("user") USER,
     @JsonProperty("system") SYSTEM,

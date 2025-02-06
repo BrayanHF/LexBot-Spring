@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class LBUserRepositoryImpl implements LBUserRepository {
@@ -44,19 +45,35 @@ public class LBUserRepositoryImpl implements LBUserRepository {
     }
 
     @Override
+    public Mono<Void> updateUser(String userId, Map<String, Object> updates) {
+        return Mono.create(sink ->
+            usersCollection().document(userId).update(updates)
+                .addListener(
+                    () -> {
+                        try {
+                            sink.success();
+                        } catch (Exception e) {
+                            sink.error(e);
+                        }
+                    }, MoreExecutors.directExecutor()
+                )
+        );
+    }
+
+    @Override
     public Mono<LBUser> getUserByEmail(String email) {
         Query query = usersCollection().whereEqualTo("email", email);
 
         return Mono.fromFuture(FutureUtils.toCompletableFuture(query.get()))
-            .mapNotNull(querySnapshot -> {
+            .flatMap(querySnapshot -> {
                 List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
 
-                if (documents.isEmpty()) return null;
+                if (documents.isEmpty()) return Mono.empty();
 
                 DocumentSnapshot document = documents.getFirst();
                 LBUser user = document.toObject(LBUser.class);
                 user.setId(document.getId());
-                return user;
+                return Mono.just(user);
             });
     }
 
