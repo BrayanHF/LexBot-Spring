@@ -1,4 +1,4 @@
-package com.lexbot.data.services.validations;
+package com.lexbot.utils.validations;
 
 import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.firestore_dao.LBUser;
@@ -6,7 +6,7 @@ import com.lexbot.data.firestore_dao.LBUser;
 import java.util.Map;
 import java.util.Set;
 
-public class Validation {
+public class SimpleValidation {
 
     public static void validateStrings(String... strings) {
         for (String str : strings) {

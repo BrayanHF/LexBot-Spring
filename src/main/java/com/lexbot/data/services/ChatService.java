@@ -2,7 +2,7 @@ package com.lexbot.data.services;
 
 import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.repositories.ChatRepository;
-import com.lexbot.data.services.validations.Validation;
+import com.lexbot.utils.validations.SimpleValidation;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -20,28 +20,33 @@ public class ChatService {
     }
 
     public Mono<List<Chat>> userChats(String userId) {
-        Validation.validateStrings(userId);
+        SimpleValidation.validateStrings(userId);
 
         return chatRepository.userChats(userId);
     }
 
-    public Mono<Chat> addChat(String userId, Chat chat) {
-        Validation.validateStrings(userId);
-        Validation.validateNotNulls(chat);
+    public Mono<Chat> addChat(String userId) {
+        SimpleValidation.validateStrings(userId);
 
-        chat.setLastUse(new Date());
+        var chat = Chat.builder()
+            .title("Nuevo chat")
+            .lastUse(new Date())
+            .build();
+
         return chatRepository.addChat(userId, chat);
     }
 
     public Mono<Map<String, Object>> updateChatByFields(String userId, String chatId, Map<String, Object> updates) {
-        Validation.validateStrings(userId, chatId);
-        Validation.validateUpdates(Chat.class, updates);
+        SimpleValidation.validateStrings(userId, chatId);
+        SimpleValidation.validateUpdates(Chat.class, updates);
+
+
 
         return chatRepository.updateChatByFields(userId, chatId, updates);
     }
 
     public Mono<Void> deleteChatById(String userId, String chatId) {
-        Validation.validateStrings(userId, chatId);
+        SimpleValidation.validateStrings(userId, chatId);
 
         return chatRepository.deleteChatById(userId, chatId);
     }
