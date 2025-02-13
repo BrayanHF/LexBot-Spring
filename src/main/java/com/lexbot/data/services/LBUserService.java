@@ -3,7 +3,7 @@ package com.lexbot.data.services;
 import com.lexbot.data.firestore_dao.LBUser;
 import com.lexbot.data.firestore_dao.LBUserStatus;
 import com.lexbot.data.repositories.LBUserRepository;
-import com.lexbot.data.services.validations.Validation;
+import com.lexbot.utils.validations.SimpleValidation;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,9 +23,9 @@ public class LBUserService {
     }
 
     public Mono<LBUser> addUser(LBUser user) {
-        Validation.validateNotNulls(user);
-        Validation.validateEmail(user.getEmail());
-        Validation.validateStrings(user.getUsername(), user.getPassword());
+        SimpleValidation.validateNotNulls(user);
+        SimpleValidation.validateEmail(user.getEmail());
+        SimpleValidation.validateStrings(user.getUsername(), user.getPassword());
 
         String password = passwordEncoder.encode(user.getPassword());
         user.setPassword(password);
@@ -35,26 +35,26 @@ public class LBUserService {
     }
 
     public Mono<Void> updateUser(String userId, Map<String, Object> updates) {
-        Validation.validateStrings(userId);
-        Validation.validateUpdates(LBUser.class, updates);
+        SimpleValidation.validateStrings(userId);
+        SimpleValidation.validateUpdates(LBUser.class, updates);
 
         return userRepository.updateUser(userId, updates);
     }
 
     public Mono<LBUser> getUserByEmail(String email) {
-        Validation.validateEmail(email);
+        SimpleValidation.validateEmail(email);
 
         return userRepository.getUserByEmail(email);
     }
 
     public Mono<Void> deleteUserById(String userId) {
-        Validation.validateStrings(userId);
+        SimpleValidation.validateStrings(userId);
 
         return userRepository.deleteUserById(userId);
     }
 
     public boolean verifyPassword(String rawPassword, String encodedPassword) {
-        Validation.validateStrings(rawPassword, encodedPassword);
+        SimpleValidation.validateStrings(rawPassword, encodedPassword);
 
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
