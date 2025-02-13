@@ -36,5 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-## Environment Variables ##
+### Environment Variables ###
 .env
+
+### Key of Firebase Firestore ###
+/src/main/resources/FirestoreKey.json

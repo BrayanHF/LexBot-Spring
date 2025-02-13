@@ -1,12 +1,12 @@
 package com.lexbot.ia.dto.response;
 
-import com.lexbot.ia.dto.IARole;
+import com.lexbot.ia.dto.Role;
 import lombok.Data;
 
 @Data
 public class IAMessageResponse {
 
-    private IARole role;
+    private Role role;
     private String content;
     private Refusal refusal;
 
