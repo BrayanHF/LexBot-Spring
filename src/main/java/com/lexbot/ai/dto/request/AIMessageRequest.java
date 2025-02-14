@@ -1,12 +1,12 @@
-package com.lexbot.ia.dto.request;
+package com.lexbot.ai.dto.request;
 
-import com.lexbot.ia.dto.Role;
+import com.lexbot.ai.dto.Role;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class IAMessageRequest {
+public class AIMessageRequest {
 
     private Role role;
     private String content;

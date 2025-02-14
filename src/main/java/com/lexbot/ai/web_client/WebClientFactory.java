@@ -1,4 +1,4 @@
-package com.lexbot.ia.web_client;
+package com.lexbot.ai.web_client;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

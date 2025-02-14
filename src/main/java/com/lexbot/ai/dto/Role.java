@@ -1,4 +1,4 @@
-package com.lexbot.ia.dto;
+package com.lexbot.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -8,15 +8,16 @@ import lombok.Data;
 public class ApiResponse<T> {
 
     private boolean success;
+    private boolean stream;
     private T data;
     private String error;
 
-    public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(true, data, null);
+    public static <T> ApiResponse<T> success(T data, boolean isStream) {
+        return new ApiResponse<>(true, isStream, data, null);
     }
 
-    public static <T> ApiResponse<T> error(String errorMessage) {
-        return new ApiResponse<>(false, null, errorMessage);
+    public static <T> ApiResponse<T> error(String errorMessage, boolean isStream) {
+        return new ApiResponse<>(false, isStream, null, errorMessage);
     }
 
 }
