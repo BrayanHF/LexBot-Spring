@@ -40,8 +40,6 @@ public class ChatService {
         SimpleValidation.validateStrings(userId, chatId);
         SimpleValidation.validateUpdates(Chat.class, updates);
 
-
-
         return chatRepository.updateChatByFields(userId, chatId, updates);
     }
 

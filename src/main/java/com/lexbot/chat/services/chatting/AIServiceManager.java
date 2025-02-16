@@ -1,4 +1,4 @@
-package com.lexbot.chat.services;
+package com.lexbot.chat.services.chatting;
 
 import com.lexbot.ai.dto.Role;
 import com.lexbot.ai.dto.request.AIChatRequest;
@@ -20,14 +20,20 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    @Setter
-    private AIService aiService;
+    private static final String DEFAULT_PROMPT = "Eres un abogado";
+    private static final String TITLE_PROMPT_PREFIX = "Dame un título muy corto del siguiente mensaje (no uses comillas): ";
+    private static final int DEFAULT_TEMPERATURE = 0;
+    private static final int MAX_TOKENS_CHAT = 200;
+    private static final int MAX_TOKENS_TITLE = 100;
 
     private final ChatService chatService;
 
     public AIServiceManager(ChatService chatService) {
         this.chatService = chatService;
     }
+
+    @Setter
+    private AIService aiService;
 
     private String getModel() {
         switch (aiService) {
@@ -44,7 +50,7 @@ public class AIServiceManager {
         }
     }
 
-    public Mono<AIChatResponse> generateAIMessage(String message) {
+    private AIChatRequest getAIChatRequest(String message) {
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
@@ -53,27 +59,30 @@ public class AIServiceManager {
 
         var systemMessage = AIMessageRequest.builder()
             .role(Role.DEVELOPER)
-            .content("Eres un abogado")
+            .content(DEFAULT_PROMPT)
             .build();
 
-        var chatRequest = AIChatRequest.builder()
+        return AIChatRequest.builder()
             .model(getModel())
             .messages(List.of(systemMessage, userMessage))
-            .temperature(0)
-            .max_tokens(200)
+            .temperature(DEFAULT_TEMPERATURE)
+            .max_tokens(MAX_TOKENS_CHAT)
             .build();
+    }
 
+    public Mono<AIChatResponse> generateAIMessage(String message) {
+        var chatRequest = getAIChatRequest(message);
         return aiService.chat(chatRequest);
     }
 
-    // Todo
     public Flux<AIChatResponse> generateStreamAIMessage(String message) {
-        return Flux.empty();
+        var chatRequest = getAIChatRequest(message);
+        return aiService.chatStream(chatRequest);
     }
 
     public void generateTitleForChat(String userId, String chatId, String message) {
 
-        String prompt = "Dame un titulo muy corto del siguiente mensaje (no uses comillas): " + message;
+        String prompt = TITLE_PROMPT_PREFIX + message;
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
@@ -83,8 +92,8 @@ public class AIServiceManager {
         var aiChatRequest = AIChatRequest.builder()
             .model(getModel())
             .messages(List.of(userMessage))
-            .temperature(0)
-            .max_tokens(100)
+            .temperature(DEFAULT_TEMPERATURE)
+            .max_tokens(MAX_TOKENS_TITLE)
             .build();
 
         aiService.chat(aiChatRequest)

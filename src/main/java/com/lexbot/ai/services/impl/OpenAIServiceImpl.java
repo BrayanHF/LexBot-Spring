@@ -41,7 +41,9 @@ public class OpenAIServiceImpl implements AIService {
     @Override
     public Flux<AIChatResponse> chatStream(AIChatRequest request) {
         request.setStream(true);
-        return openAiRequest(request).bodyToFlux(AIChatResponse.class);
+        return openAiRequest(request)
+            .bodyToFlux(AIChatResponse.class)
+            .takeUntil(response -> response.getChoices().getFirst().getFinish_reason() != null);
     }
 
 }

@@ -1,9 +1,10 @@
-package com.lexbot.chat.services;
+package com.lexbot.chat.services.chatting;
 
 import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 // Todo: layer of laws
@@ -47,5 +48,29 @@ public class ChatOrchestratorService {
             .onErrorResume(e -> Mono.error(new RuntimeException("Chat process error", e)));
     }
 
+    public Flux<AIChatResponse> chatStream(String userId, String chatId, String userMessage) {
+        var getOrCreateChatMono = chatMessageService.getOrCreateChat(userId, chatId, userMessage).cache();
+        var generateStreamAIMessageFlux = aiServiceManager.generateStreamAIMessage(userMessage);
+
+        var stringBuilder = new StringBuilder();
+        return getOrCreateChatMono
+            .flatMapMany(
+                chat -> generateStreamAIMessageFlux
+                    .doOnNext(
+                        iaChatResponse -> {
+                            var choice = iaChatResponse.getChoices().getFirst();
+                            if (choice.getFinish_reason() == null) {
+                                stringBuilder.append(choice.getResponse().getContent());
+                            }
+                        }
+                    )
+                    .doOnComplete(
+                        () -> {
+                            String assistantMessage = stringBuilder.toString();
+                            chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
+                        }
+                    )
+            );
+    }
 
 }

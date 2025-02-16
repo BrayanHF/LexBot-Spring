@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public enum AIFinishReason {
 
     @JsonProperty("stop") STOP,
-    @JsonProperty("null") NULL,
     @JsonProperty("length") LENGTH,
     @JsonProperty("content_filter") CONTENT_FILTER,
     @JsonProperty("function_call") FUNCTION_CALL,
