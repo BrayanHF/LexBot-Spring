@@ -3,6 +3,7 @@ package com.lexbot.data.services;
 import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.repositories.ChatRepository;
 import com.lexbot.utils.validations.SimpleValidation;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -11,13 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class ChatService {
 
     private final ChatRepository chatRepository;
-
-    public ChatService(ChatRepository chatRepository) {
-        this.chatRepository = chatRepository;
-    }
 
     public Mono<List<Chat>> userChats(String userId) {
         SimpleValidation.validateStrings(userId);

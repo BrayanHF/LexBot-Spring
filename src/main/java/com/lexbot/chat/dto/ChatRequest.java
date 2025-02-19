@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ChatRequest {
 
-    private String chat_id;
+    private String chatId;
     private String message;
 
 }
