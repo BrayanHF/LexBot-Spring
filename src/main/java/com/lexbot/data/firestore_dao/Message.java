@@ -22,5 +22,6 @@ public class Message {
     private String text;
     private Role role;
     private Date date;
+    private int conversationIndex;
 
 }

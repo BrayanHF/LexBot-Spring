@@ -3,7 +3,9 @@ package com.lexbot.data.repositories.impl.firebase;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Query;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.lexbot.ai.dto.Role;
 import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.firestore_dao.LBUser;
 import com.lexbot.data.firestore_dao.Message;
@@ -12,6 +14,7 @@ import com.lexbot.data.repositories.impl.firebase.config.FutureUtils;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,19 +39,31 @@ public class MessageRepositoryImpl implements MessageRepository {
         CollectionReference messagesCollection = messagesCollection(userId, chatId);
 
         return Mono.fromFuture(FutureUtils.toCompletableFuture(messagesCollection.get()))
-            .map(
-                querySnapshots -> querySnapshots
-                    .getDocuments()
-                    .stream()
-                    .map(
-                        document -> {
-                            Message message = document.toObject(Message.class);
-                            message.setId(document.getId());
-                            return message;
-                        }
-                    )
-                    .collect(Collectors.toList())
-            );
+            .flatMap(
+                querySnapshots -> {
+                    var messages = querySnapshots
+                        .getDocuments()
+                        .stream()
+                        .filter(document -> document != null)
+                        .map(
+                            document -> {
+                                if (!document.exists()) return null;
+
+                                Message message = document.toObject(Message.class);
+                                message.setId(document.getId());
+                                return message;
+                            }
+                        )
+                        .sorted(Comparator
+                            .comparing(Message::getConversationIndex)
+                            .thenComparing(msg -> msg.getRole() == Role.USER ? 0 : 1)
+                        )
+                        .collect(Collectors.toList());
+
+                    return messages.isEmpty() ? Mono.empty() : Mono.just(messages);
+                }
+            )
+            .onErrorResume(e -> Mono.error(new RuntimeException("Failed to fetch messages", e)));
     }
 
     @Override
@@ -80,6 +95,21 @@ public class MessageRepositoryImpl implements MessageRepository {
                 )
             )
             .then();
+    }
+
+    @Override
+    public Mono<Integer> getNextConversationIndex(String userId, String chatId) {
+        Query query = messagesCollection(userId, chatId).orderBy("conversationIndex").limit(1);
+
+        return Mono.fromFuture(FutureUtils.toCompletableFuture(query.get()))
+            .map(querySnapshot -> {
+                    var documents = querySnapshot.getDocuments();
+                    if (documents.isEmpty()) return 0;
+
+                    Long lastIndex = documents.getFirst().getLong("conversationIndex");
+                    return lastIndex != null ? lastIndex.intValue() + 1 : 0;
+                }
+            );
     }
 
 }

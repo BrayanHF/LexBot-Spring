@@ -38,4 +38,8 @@ public class MessageService {
         return messageRepository.deleteMessageById(userId, chatId, messageId);
     }
 
+    public Mono<Integer> getNextConversationIndex(String userId, String chatId) {
+        return messageRepository.getNextConversationIndex(userId, chatId);
+    }
+
 }

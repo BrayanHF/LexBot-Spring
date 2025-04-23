@@ -29,6 +29,14 @@ public class ChatController {
             .onErrorResume(e -> Mono.just(ApiResponse.error(e.getMessage(), false)));
     }
 
+    @GetMapping("chat-id/{chatId}")
+    public Mono<ApiResponse<Chat>> getChatById(@PathVariable String chatId) {
+        return chatService
+            .getChatById(USER_ID, chatId)
+            .map(chat -> ApiResponse.success(chat, false))
+            .onErrorResume(e -> Mono.just(ApiResponse.error(e.getMessage(), false)));
+    }
+
     @PatchMapping
     public Mono<ApiResponse<Map<String, Object>>> updateChat(@RequestBody ChatUpdateRequest request) {
         return chatService
@@ -37,8 +45,8 @@ public class ChatController {
             .onErrorResume(e -> Mono.just(ApiResponse.error("Error updating chat: " + e.getMessage(), false)));
     }
 
-    @DeleteMapping
-    public Mono<ApiResponse<String>> deleteChat(@RequestBody String chatId) {
+    @DeleteMapping("chat-id/{chatId}")
+    public Mono<ApiResponse<String>> deleteChat(@PathVariable String chatId) {
         return chatService
             .deleteChatById(USER_ID, chatId)
             .thenReturn(ApiResponse.success("Deleted chat", false))

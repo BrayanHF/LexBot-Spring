@@ -33,25 +33,32 @@ public class ChatMessageService {
 
     public void saveMessages(String userId, String chatId, String userMessageText, String assistantMessageText) {
 
-        var userMessage = Message.builder()
-            .role(Role.USER)
-            .text(userMessageText)
-            .build();
+        messageService.getNextConversationIndex(userId, chatId)
+            .flatMap(index -> {
 
-        var assistantMessage = Message.builder()
-            .role(Role.ASSISTANT)
-            .text(assistantMessageText)
-            .build();
+                var userMessage = Message.builder()
+                    .role(Role.USER)
+                    .text(userMessageText)
+                    .conversationIndex(index)
+                    .build();
 
-        Mono.when(
-                messageService.addMessage(userId, chatId, userMessage)
-                    .onErrorResume(e -> Mono.error(new RuntimeException("Error saving user message", e))),
+                var assistantMessage = Message.builder()
+                    .role(Role.ASSISTANT)
+                    .text(assistantMessageText)
+                    .conversationIndex(index)
+                    .build();
 
-                messageService.addMessage(userId, chatId, assistantMessage)
-                    .onErrorResume(e -> Mono.error(new RuntimeException("Error saving assistant message", e)))
-            )
-            .subscribeOn(Schedulers.boundedElastic())
+                return Mono.when(
+                        messageService.addMessage(userId, chatId, userMessage)
+                            .onErrorResume(e -> Mono.error(new RuntimeException("Error saving user message", e))),
+
+                        messageService.addMessage(userId, chatId, assistantMessage)
+                            .onErrorResume(e -> Mono.error(new RuntimeException("Error saving assistant message", e)))
+                    )
+                    .subscribeOn(Schedulers.boundedElastic());
+            })
             .subscribe();
+
     }
 
 }

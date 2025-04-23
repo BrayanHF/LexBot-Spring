@@ -10,6 +10,8 @@ public interface ChatRepository {
 
     Mono<List<Chat>> userChats(String userId);
 
+    Mono<Chat> getChatById(String userId, String chatId);
+
     Mono<Chat> addChat(String userId, Chat chat);
 
     Mono<Map<String, Object>> updateChatByFields(String userId, String chatId, Map<String, Object> updates);

@@ -1,8 +1,8 @@
 package com.lexbot.chat.controllers;
 
-import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.chat.dto.ApiResponse;
 import com.lexbot.chat.dto.ChatRequest;
+import com.lexbot.chat.dto.ChattingResponse;
 import com.lexbot.chat.services.chatting.ChatOrchestratorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ public class LBChattingController {
     private final ChatOrchestratorService chatService;
 
     @PostMapping
-    public Mono<ApiResponse<AIChatResponse>> chat(@RequestBody ChatRequest request) {
+    public Mono<ApiResponse<ChattingResponse>> chat(@RequestBody ChatRequest request) {
         return chatService
             .chat(USER_ID, request.getChatId(), request.getMessage())
             .map(response -> ApiResponse.success(response, false))
@@ -30,7 +30,7 @@ public class LBChattingController {
     }
 
     @PostMapping(value = "stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ApiResponse<AIChatResponse>> chatStream(@RequestBody ChatRequest request) {
+    public Flux<ApiResponse<ChattingResponse>> chatStream(@RequestBody ChatRequest request) {
         return chatService
             .chatStream(USER_ID, request.getChatId(), request.getMessage())
             .map(response -> ApiResponse.success(response, true))

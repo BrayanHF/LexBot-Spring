@@ -3,6 +3,7 @@ package com.lexbot.chat.services.chatting;
 import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
+import com.lexbot.chat.dto.ChattingResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,7 +30,7 @@ public class ChatOrchestratorService {
         aiServiceManager.setAiService(aiService);
     }
 
-    public Mono<AIChatResponse> chat(String userId, String chatId, String userMessage) {
+    public Mono<ChattingResponse> chat(String userId, String chatId, String userMessage) {
         return Mono.zip(
                 chatMessageService.getOrCreateChat(userId, chatId, userMessage),
                 aiServiceManager.generateAIMessage(userMessage)
@@ -42,34 +43,50 @@ public class ChatOrchestratorService {
 
                     chatMessageService.saveMessages(userId, chat_id, userMessage, assistantMessage);
 
-                    return Mono.just(aiChatResponse);
+                    String newChatId = chatId == null || chatId.isEmpty() ? chat_id : null;
+
+                    return Mono.just(
+                        ChattingResponse.builder()
+                            .newChatId(newChatId)
+                            .aiChatResponse(aiChatResponse).
+                            build()
+                    );
                 }
             )
             .onErrorResume(e -> Mono.error(new RuntimeException("Chat process error", e)));
     }
 
-    public Flux<AIChatResponse> chatStream(String userId, String chatId, String userMessage) {
+    public Flux<ChattingResponse> chatStream(String userId, String chatId, String userMessage) {
         var getOrCreateChatMono = chatMessageService.getOrCreateChat(userId, chatId, userMessage).cache();
         var generateStreamAIMessageFlux = aiServiceManager.generateStreamAIMessage(userMessage);
 
         var stringBuilder = new StringBuilder();
         return getOrCreateChatMono
             .flatMapMany(
-                chat -> generateStreamAIMessageFlux
-                    .doOnNext(
-                        iaChatResponse -> {
-                            var choice = iaChatResponse.getChoices().getFirst();
-                            if (choice.getFinish_reason() == null) {
-                                stringBuilder.append(choice.getResponse().getContent());
+                chat -> {
+                    String newChatId = chatId == null || chatId.isEmpty() ? chat.getId() : null;
+
+                    return generateStreamAIMessageFlux
+                        .map(
+                            iaChatResponse -> {
+                                var choice = iaChatResponse.getChoices().getFirst();
+                                if (choice.getFinish_reason() == null) {
+                                    stringBuilder.append(choice.getResponse().getContent());
+                                }
+
+                                return ChattingResponse.builder()
+                                    .newChatId(newChatId)
+                                    .aiChatResponse(iaChatResponse)
+                                    .build();
                             }
-                        }
-                    )
-                    .doOnComplete(
-                        () -> {
-                            String assistantMessage = stringBuilder.toString();
-                            chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
-                        }
-                    )
+                        )
+                        .doOnComplete(
+                            () -> {
+                                String assistantMessage = stringBuilder.toString();
+                                chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
+                            }
+                        );
+                }
             );
     }
 

@@ -51,6 +51,21 @@ public class ChatRepositoryImpl implements ChatRepository {
     }
 
     @Override
+    public Mono<Chat> getChatById(String userId, String chatId) {
+        DocumentReference chatsCollection = chatsCollection(userId).document(chatId);
+
+        return Mono.fromFuture(FutureUtils.toCompletableFuture(chatsCollection.get()))
+            .flatMap(
+                document -> {
+                    Chat chat = document.toObject(Chat.class);
+                    if (chat == null || !document.exists()) return Mono.error(new RuntimeException("Chat not found"));
+                    chat.setId(document.getId());
+                    return Mono.just(chat);
+                }
+            );
+    }
+
+    @Override
     public Mono<Chat> addChat(String userId, Chat chat) {
         DocumentReference newChatRef = chatsCollection(userId).document();
         chat.setId(newChatRef.getId());

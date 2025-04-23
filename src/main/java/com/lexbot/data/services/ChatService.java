@@ -23,13 +23,16 @@ public class ChatService {
         return chatRepository.userChats(userId);
     }
 
+    public Mono<Chat> getChatById(String userId, String chatId) {
+        SimpleValidation.validateStrings(userId, chatId);
+
+        return chatRepository.getChatById(userId, chatId);
+    }
+
     public Mono<Chat> addChat(String userId) {
         SimpleValidation.validateStrings(userId);
 
-        var chat = Chat.builder()
-            .title("Nuevo chat")
-            .lastUse(new Date())
-            .build();
+        var chat = Chat.builder().title("Nuevo chat").lastUse(new Date()).build();
 
         return chatRepository.addChat(userId, chat);
     }
