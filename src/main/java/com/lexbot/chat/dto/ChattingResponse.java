@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class ChattingResponse {
 
-    private String newChatId;
+    private String chatId;
     private AIChatResponse aiChatResponse;
 
 }

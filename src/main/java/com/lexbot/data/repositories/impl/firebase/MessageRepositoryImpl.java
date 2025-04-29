@@ -99,7 +99,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public Mono<Integer> getNextConversationIndex(String userId, String chatId) {
-        Query query = messagesCollection(userId, chatId).orderBy("conversationIndex").limit(1);
+        Query query = messagesCollection(userId, chatId)
+            .orderBy("conversationIndex", Query.Direction.DESCENDING)
+            .limit(1);
 
         return Mono.fromFuture(FutureUtils.toCompletableFuture(query.get()))
             .map(querySnapshot -> {

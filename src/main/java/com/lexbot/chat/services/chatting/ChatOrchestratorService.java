@@ -47,7 +47,7 @@ public class ChatOrchestratorService {
 
                     return Mono.just(
                         ChattingResponse.builder()
-                            .newChatId(newChatId)
+                            .chatId(newChatId)
                             .aiChatResponse(aiChatResponse).
                             build()
                     );
@@ -64,7 +64,7 @@ public class ChatOrchestratorService {
         return getOrCreateChatMono
             .flatMapMany(
                 chat -> {
-                    String newChatId = chatId == null || chatId.isEmpty() ? chat.getId() : null;
+                    String newChatId = chatId == null || chatId.isEmpty() ? chat.getId() : chatId;
 
                     return generateStreamAIMessageFlux
                         .map(
@@ -75,7 +75,7 @@ public class ChatOrchestratorService {
                                 }
 
                                 return ChattingResponse.builder()
-                                    .newChatId(newChatId)
+                                    .chatId(newChatId)
                                     .aiChatResponse(iaChatResponse)
                                     .build();
                             }
