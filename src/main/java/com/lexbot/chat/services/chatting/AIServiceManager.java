@@ -20,7 +20,6 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    private static final String DEFAULT_PROMPT = "Eres un abogado";
     private static final String TITLE_PROMPT_PREFIX = "Dame un título muy corto del siguiente mensaje (no uses comillas): ";
     private static final int DEFAULT_TEMPERATURE = 0;
     private static final int MAX_TOKENS_CHAT = 200;
@@ -50,7 +49,7 @@ public class AIServiceManager {
         }
     }
 
-    private AIChatRequest getAIChatRequest(String message) {
+    private AIChatRequest getAIChatRequest(String message, String prompt) {
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
@@ -59,7 +58,7 @@ public class AIServiceManager {
 
         var systemMessage = AIMessageRequest.builder()
             .role(Role.DEVELOPER)
-            .content(DEFAULT_PROMPT)
+            .content(prompt)
             .build();
 
         return AIChatRequest.builder()
@@ -70,13 +69,13 @@ public class AIServiceManager {
             .build();
     }
 
-    public Mono<AIChatResponse> generateAIMessage(String message) {
-        var chatRequest = getAIChatRequest(message);
+    public Mono<AIChatResponse> generateAIMessage(String message, String prompt) {
+        var chatRequest = getAIChatRequest(message, prompt);
         return aiService.chat(chatRequest);
     }
 
-    public Flux<AIChatResponse> generateStreamAIMessage(String message) {
-        var chatRequest = getAIChatRequest(message);
+    public Flux<AIChatResponse> generateStreamAIMessage(String message, String prompt) {
+        var chatRequest = getAIChatRequest(message, prompt);
         return aiService.chatStream(chatRequest);
     }
 
