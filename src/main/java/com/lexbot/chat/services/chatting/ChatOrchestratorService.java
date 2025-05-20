@@ -4,23 +4,12 @@ import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
 import com.lexbot.chat.dto.ChattingResponse;
-import com.lexbot.chat.dto.QuestionAnswer;
-import com.lexbot.chat.dto.ValidatedAnswer;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-// Todo: layer of laws
 @Service
 public class ChatOrchestratorService {
-
-    private static final String VALIDATE_ANSWER_PROMPT = """
-        Eres un asistente que valida respuestas para un formulario jurídico colombiano.
-        Responde únicamente en formato JSON con las siguientes propiedades:
-        - error (string | null): si la respuesta no es válida, aquí va el mensaje que se le debe mostrar al usuario.
-        - result (string | null): si la respuesta es válida, este es el texto útil que se usará para el documento.
-        No expliques nada, no incluyas texto fuera del JSON.
-        """;
 
     public static final String LEGAL_COL_PROMPT = """
         Eres un asistente legal especializado únicamente en el contexto jurídico colombiano.
@@ -54,7 +43,7 @@ public class ChatOrchestratorService {
     public Mono<ChattingResponse> chat(String userId, String chatId, String userMessage) {
         return Mono.zip(
                 chatMessageService.getOrCreateChat(userId, chatId, userMessage),
-                aiServiceManager.generateAIMessage(userMessage, LEGAL_COL_PROMPT)
+                aiServiceManager.generateAIMessageLimited(userMessage, LEGAL_COL_PROMPT)
             )
             .flatMap(
                 tuple -> {
@@ -107,28 +96,6 @@ public class ChatOrchestratorService {
                                 chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
                             }
                         );
-                }
-            );
-    }
-
-    public Mono<ValidatedAnswer> validateAnswer(QuestionAnswer qa) {
-        String userMessage = "Pregunta: " + qa.getQuestion() +
-            "\nRespuesta: " + qa.getAnswer() +
-            "\nValida si la respuesta dada tiene sentido y responde correctamente a la pregunta hecha";
-
-        return aiServiceManager.generateAIMessage(userMessage, VALIDATE_ANSWER_PROMPT)
-            .map(
-                aiChatResponse -> {
-                    String json = aiChatResponse.getChoices().getFirst().getResponse().getContent();
-
-                    try {
-                        return ValidatedAnswer.parse(json);
-                    } catch (Exception e) {
-                        var validatedAnswer = new ValidatedAnswer();
-                        validatedAnswer.setError(null);
-                        validatedAnswer.setResult(null);
-                        return validatedAnswer;
-                    }
                 }
             );
     }

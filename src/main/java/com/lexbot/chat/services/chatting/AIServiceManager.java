@@ -20,9 +20,10 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    private static final String TITLE_PROMPT_PREFIX = "Dame un título muy corto del siguiente mensaje (no uses comillas): ";
     private static final int DEFAULT_TEMPERATURE = 0;
-    private static final int MAX_TOKENS_CHAT = 200;
+    private static final int TEMPERATURE_FOR_UNLIMITED = 1;
+    private static final int MAX_TOKENS_CHAT_LIMITED = 200;
+    private static final int MAX_TOKENS_CHAT_UNLIMITED = 2000;
     private static final int MAX_TOKENS_TITLE = 100;
 
     private final ChatService chatService;
@@ -49,7 +50,7 @@ public class AIServiceManager {
         }
     }
 
-    private AIChatRequest getAIChatRequest(String message, String prompt) {
+    private AIChatRequest getAIChatRequest(String message, String prompt, boolean limited, int temperature) {
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
@@ -64,24 +65,30 @@ public class AIServiceManager {
         return AIChatRequest.builder()
             .model(getModel())
             .messages(List.of(systemMessage, userMessage))
-            .temperature(DEFAULT_TEMPERATURE)
-            .max_tokens(MAX_TOKENS_CHAT)
+            .temperature(temperature)
+            .max_tokens(limited ? MAX_TOKENS_CHAT_LIMITED : MAX_TOKENS_CHAT_UNLIMITED)
             .build();
     }
 
-    public Mono<AIChatResponse> generateAIMessage(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt);
+    public Mono<AIChatResponse> generateAIMessageLimited(String message, String prompt) {
+        var chatRequest = getAIChatRequest(message, prompt, true, DEFAULT_TEMPERATURE);
+        return aiService.chat(chatRequest);
+    }
+
+    public Mono<AIChatResponse> generateAIMessageUnlimited(String message, String prompt) {
+        var chatRequest = getAIChatRequest(message, prompt, false, TEMPERATURE_FOR_UNLIMITED);
         return aiService.chat(chatRequest);
     }
 
     public Flux<AIChatResponse> generateStreamAIMessage(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt);
+        var chatRequest = getAIChatRequest(message, prompt, true, DEFAULT_TEMPERATURE);
         return aiService.chatStream(chatRequest);
     }
 
     public void generateTitleForChat(String userId, String chatId, String message) {
 
-        String prompt = TITLE_PROMPT_PREFIX + message;
+        String prompt = "Dame un título muy corto del siguiente mensaje (no uses comillas): " + message;
+
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
