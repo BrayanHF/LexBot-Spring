@@ -3,7 +3,7 @@ package com.lexbot.chat.services.chatting;
 import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
-import com.lexbot.chat.dto.ChattingResponse;
+import com.lexbot.chat.dto.chat.ChattingResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

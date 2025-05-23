@@ -1,0 +1,13 @@
+package com.lexbot.chat.services.generate.text;
+
+public enum PromptType {
+    VALIDATE_ANSWER_RIGHT_PETITION,
+    VALIDATE_ANSWER_COMPLAINT,
+    VALIDATE_ANSWER_SPECIAL_POWER,
+    VALIDATE_ANSWER_HABEAS_DATA,
+    RIGHT_PETITION,
+    COMPLAINT,
+    SPECIAL_POWER,
+    HABEAS_DATA
+}
+

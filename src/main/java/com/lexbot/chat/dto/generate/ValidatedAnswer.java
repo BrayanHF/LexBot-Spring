@@ -1,4 +1,4 @@
-package com.lexbot.chat.dto;
+package com.lexbot.chat.dto.generate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;

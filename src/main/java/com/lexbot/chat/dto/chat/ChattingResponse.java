@@ -1,4 +1,4 @@
-package com.lexbot.chat.dto;
+package com.lexbot.chat.dto.chat;
 
 import com.lexbot.ai.dto.response.AIChatResponse;
 import lombok.Builder;

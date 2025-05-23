@@ -43,6 +43,10 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'com.itextpdf:itext7-core:7.2.5' // iText PDF
+    implementation 'com.itextpdf:html2pdf:4.0.4' // HTML → PDF
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.0' // Markdown → HTML
 }
 
 tasks.named('test') {

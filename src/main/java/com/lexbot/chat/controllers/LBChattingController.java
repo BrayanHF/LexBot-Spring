@@ -1,8 +1,8 @@
 package com.lexbot.chat.controllers;
 
-import com.lexbot.chat.dto.ApiResponse;
-import com.lexbot.chat.dto.ChatRequest;
-import com.lexbot.chat.dto.ChattingResponse;
+import com.lexbot.chat.dto.chat.ApiResponse;
+import com.lexbot.chat.dto.chat.ChatRequest;
+import com.lexbot.chat.dto.chat.ChattingResponse;
 import com.lexbot.chat.services.chatting.ChatOrchestratorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

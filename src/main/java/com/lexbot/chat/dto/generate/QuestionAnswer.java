@@ -1,4 +1,4 @@
-package com.lexbot.chat.dto;
+package com.lexbot.chat.dto.generate;
 
 import lombok.Data;
 

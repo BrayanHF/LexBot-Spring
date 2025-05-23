@@ -1,6 +1,6 @@
 package com.lexbot.chat.controllers;
 
-import com.lexbot.chat.dto.ApiResponse;
+import com.lexbot.chat.dto.chat.ApiResponse;
 import com.lexbot.data.firestore_dao.Message;
 import com.lexbot.data.services.MessageService;
 import lombok.AllArgsConstructor;
