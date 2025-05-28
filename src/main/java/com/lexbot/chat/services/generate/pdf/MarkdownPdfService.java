@@ -20,6 +20,10 @@ public class MarkdownPdfService {
     public byte[] generatePdfFromMarkdown(String markdown) {
         try {
             MutableDataSet options = new MutableDataSet();
+            options.set(Parser.EXTENSIONS, java.util.Collections.emptyList());
+            options.set(HtmlRenderer.SUPPRESS_HTML, false);
+            options.set(HtmlRenderer.ESCAPE_HTML, false);
+
             Parser parser = Parser.builder(options).build();
             HtmlRenderer renderer = HtmlRenderer.builder(options).build();
             Document document = parser.parse(markdown);
@@ -48,10 +52,10 @@ public class MarkdownPdfService {
                     h2, h3 {
                       text-align: left;
                     }
-                    blockquote {
-                      font-size: 12pt;
-                      margin-left: 4cm;
-                      line-height: 1.2;
+                    ul, ol {
+                      padding-left: 0;
+                      margin-left: 0;
+                      list-style-position: inside;
                     }
                   </style>
                 </head>

@@ -81,7 +81,7 @@ public class AIServiceManager {
     }
 
     public Flux<AIChatResponse> generateStreamAIMessage(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt, true, DEFAULT_TEMPERATURE);
+        var chatRequest = getAIChatRequest(message, prompt, false, DEFAULT_TEMPERATURE);
         return aiService.chatStream(chatRequest);
     }
 
