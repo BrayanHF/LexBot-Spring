@@ -9,10 +9,6 @@ public interface LBUserRepository {
 
     Mono<LBUser> addUser(LBUser user);
 
-    Mono<Void> updateUser(String userId, Map<String, Object> updates);
-
-    Mono<LBUser> getUserByEmail(String email);
-
     Mono<Void> deleteUserById(String userId);
 
 }

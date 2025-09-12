@@ -20,13 +20,6 @@ public class SimpleValidation {
         }
     }
 
-    public static void validateEmail(String email) {
-        validateStrings(email);
-        String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
-
-        if (!email.matches(regex)) throw new IllegalArgumentException("Invalid email format");
-    }
-
     private static final Map<Class<?>, Set<String>> VALID_FIELDS_MAP = Map.of(
         Chat.class, Set.of("title", "lastUse"),
         LBUser.class, Set.of("username", "email", "password", "status")

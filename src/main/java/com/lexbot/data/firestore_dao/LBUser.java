@@ -16,10 +16,9 @@ public class LBUser {
     public static final String PATH = "users";
 
     @DocumentId
-    private String id;
-    private String username;
+    private String uid;
+    private String displayName;
     private String email;
-    private String password;
     private LBUserStatus status;
 
 }
