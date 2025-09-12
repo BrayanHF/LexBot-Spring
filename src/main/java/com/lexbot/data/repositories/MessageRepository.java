@@ -13,4 +13,6 @@ public interface MessageRepository {
 
     Mono<Void> deleteMessageById(String userId, String chatId, String messageId);
 
+    Mono<Integer> getNextConversationIndex(String userId, String chatId);
+
 }
