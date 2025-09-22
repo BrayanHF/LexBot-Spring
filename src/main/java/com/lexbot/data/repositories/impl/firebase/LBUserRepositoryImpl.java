@@ -23,7 +23,7 @@ public class LBUserRepositoryImpl implements LBUserRepository {
 
     @Override
     public Mono<LBUser> addUser(LBUser user) {
-        DocumentReference newUserRef = usersCollection().document();
+        DocumentReference newUserRef = usersCollection().document(user.getUid());
 
         return Mono.create(sink ->
             newUserRef
