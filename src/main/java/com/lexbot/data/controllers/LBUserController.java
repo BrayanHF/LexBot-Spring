@@ -4,8 +4,6 @@ import com.lexbot.chat.dto.chat.ApiResponse;
 import com.lexbot.data.firestore_dao.LBUser;
 import com.lexbot.data.services.LBUserService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;

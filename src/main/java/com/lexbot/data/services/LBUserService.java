@@ -14,6 +14,12 @@ public class LBUserService {
 
     private final LBUserRepository userRepository;
 
+    public Mono<LBUser> getUserById(String userId) {
+        SimpleValidation.validateStrings(userId);
+
+        return userRepository.getUserById(userId);
+    }
+
     public Mono<LBUser> addUser(LBUser user) {
         SimpleValidation.validateNotNulls(user);
 

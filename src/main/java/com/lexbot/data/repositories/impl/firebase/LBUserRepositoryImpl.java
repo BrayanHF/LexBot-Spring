@@ -22,6 +22,20 @@ public class LBUserRepositoryImpl implements LBUserRepository {
     }
 
     @Override
+    public Mono<LBUser> getUserById(String userId) {
+        DocumentReference userRef = usersCollection().document(userId);
+
+        return Mono.fromFuture(FutureUtils.toCompletableFuture(userRef.get())).flatMap(
+            document -> {
+                LBUser lbUser = document.toObject(LBUser.class);
+                if (lbUser == null || !document.exists()) return Mono.error(new RuntimeException("User not found"));
+                lbUser.setUid(document.getId());
+                return Mono.just(lbUser);
+            }
+        );
+    }
+
+    @Override
     public Mono<LBUser> addUser(LBUser user) {
         DocumentReference newUserRef = usersCollection().document(user.getUid());
 

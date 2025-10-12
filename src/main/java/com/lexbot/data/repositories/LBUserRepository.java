@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface LBUserRepository {
 
+    Mono<LBUser> getUserById(String userId);
+
     Mono<LBUser> addUser(LBUser user);
 
     Mono<Void> deleteUserById(String userId);

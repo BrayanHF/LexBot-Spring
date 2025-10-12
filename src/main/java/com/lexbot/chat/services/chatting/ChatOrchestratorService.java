@@ -4,6 +4,7 @@ import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
 import com.lexbot.chat.dto.chat.ChattingResponse;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,6 +25,10 @@ public class ChatOrchestratorService {
 
     private final AIServiceManager aiServiceManager;
     private final ChatMessageService chatMessageService;
+    private final AIServiceFactory aiServiceFactory;
+
+    @Getter
+    private AIProvider currentProvider = AIProvider.OPEN_AI;
 
     public ChatOrchestratorService(
         AIServiceManager aiServiceManager,
@@ -32,12 +37,18 @@ public class ChatOrchestratorService {
     ) {
         this.aiServiceManager = aiServiceManager;
         this.chatMessageService = chatMessageService;
-        setAIService(aiServiceFactory);
+        this.aiServiceFactory = aiServiceFactory;
+        setAIService(currentProvider);
     }
 
-    private void setAIService(AIServiceFactory aiServiceFactory) {
-        var aiService = aiServiceFactory.getAIService(AIProvider.OPEN_AI);
+    private void setAIService(AIProvider provider) {
+        var aiService = aiServiceFactory.getAIService(provider);
         aiServiceManager.setAiService(aiService);
+        this.currentProvider = provider;
+    }
+
+    public void changeAIProvider(AIProvider newProvider) {
+        setAIService(newProvider);
     }
 
     public Mono<ChattingResponse> chat(String userId, String chatId, String userMessage) {
@@ -99,5 +110,12 @@ public class ChatOrchestratorService {
                 }
             );
     }
+
+    public Mono<String> newChat(String userId, String chatId, String userMessage) {
+        return chatMessageService
+            .getOrCreateChat(userId, chatId, userMessage)
+            .flatMap(chat -> Mono.just(chat.getId()));
+    }
+
 
 }
