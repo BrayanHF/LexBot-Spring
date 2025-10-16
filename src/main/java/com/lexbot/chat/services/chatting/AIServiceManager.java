@@ -20,10 +20,10 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    private static final int DEFAULT_TEMPERATURE = 0;
+    private static final int DEFAULT_TEMPERATURE = 1;
     private static final int TEMPERATURE_FOR_UNLIMITED = 1;
-    private static final int MAX_TOKENS_CHAT_LIMITED = 200;
-    private static final int MAX_TOKENS_CHAT_UNLIMITED = 2000;
+    private static final int MAX_TOKENS_CHAT_LIMITED = 5000;
+    private static final int MAX_TOKENS_CHAT_UNLIMITED = 5000;
     private static final int MAX_TOKENS_TITLE = 100;
 
     private final ChatService chatService;
