@@ -6,9 +6,11 @@ import com.google.cloud.firestore.Firestore;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.firestore_dao.LBUser;
+import com.lexbot.data.firestore_dao.Message;
 import com.lexbot.data.repositories.ChatRepository;
 import com.lexbot.data.repositories.impl.firebase.config.FutureUtils;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -103,10 +105,20 @@ public class ChatRepositoryImpl implements ChatRepository {
 
     @Override
     public Mono<Void> deleteChatById(String userId, String chatId) {
-        return Mono
-            .fromFuture(
-                FutureUtils.toCompletableFuture(
-                    chatsCollection(userId).document(chatId).delete()
+        var chatRef = chatsCollection(userId).document(chatId);
+        var messagesRef = chatRef.collection(Message.PATH);
+
+        return Mono.fromFuture(FutureUtils.toCompletableFuture(messagesRef.get()))
+            .flatMapMany(
+                qsMessages -> Flux.fromIterable(qsMessages.getDocuments())
+            ).flatMap(
+                message -> Mono.fromFuture(FutureUtils.toCompletableFuture(
+                    message.getReference().delete())
+                )
+            )
+            .then(
+                Mono.fromFuture(FutureUtils.toCompletableFuture(
+                    chatRef.delete())
                 )
             )
             .then();

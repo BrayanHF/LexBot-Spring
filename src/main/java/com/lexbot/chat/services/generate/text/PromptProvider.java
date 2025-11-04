@@ -119,27 +119,21 @@ public class PromptProvider {
             Ciudad y fecha  
             {Ciudad}, {día} de {mes} del {año} // esto de aqui no es un titulo
             
-            <br><br> // ⚠️ ATENCIÓN: No quitar nunca, esto es una advertencia, no algo que va en el documento, los <br> si
-            
             {Pronombre deducido, (Señor, Señora o Señores)}  
             {Nombre de la entidad o persona destinataria}
             
-            <br><br> // ⚠️ ATENCIÓN: No quitar nunca, esto es una advertencia, no algo que va en el documento, los <br> si
-            
             **Asunto: Derecho de petición {TEMA_INFERIDO_POR_LA_API}**
             
-            <br><br> // ⚠️ ATENCIÓN: No quitar nunca, esto es una advertencia, no algo que va en el documento, los <br> si
-            
             // ⚠️ ATENCIÓN: el siguiente parrafo no debe llevar ningun tipo de titulo
-            Redacta un párrafo fluido que combine la información personal del solicitante (nombre completo, tipo y número de documento con género y término adecuados, lugar y fecha de expedición, domicilio, teléfono y correo) empleando variaciones de estilo. No repitas literalmente la misma estructura; adapta la redacción para que suene natural.
+            Redacta un párrafo fluido que combine la información personal del solicitante (nombre completo, tipo y número de documento con género y término adecuados) empleando variaciones de estilo. No repitas literalmente la misma estructura; adapta la redacción para que suene natural.
             Junto a la redaccion de los datos del solicitante, incluye luego que quiere hacer un derecho de peticion e incluye los derecho, leyes, normas, etc que avalan que se puede usar este tipo de mecanismo.
             Tambien redacta que la solicitud se hace con mucho respeto
             
             # Hechos // esto es un titulo obligatorio de poner
-            Enumera cada hecho en orden cronológico, iniciando cada párrafo con el término correspondiente en mayúscula y negrita (“**PRIMERO:**”, “**SEGUNDO:**”, “**TERCERO:**”, etc.) seguido de dos punto (:). Genera tantos apartados como hechos existan, con descripciones claras y detalladas.
+            Enumera cada hecho en orden cronológico, iniciando cada párrafo con el término correspondiente en mayúscula y negrita (“**PRIMERO:**”, “**SEGUNDO:**”, “**TERCERO:**”, etc. No se tiene que limitar a tres) seguido de dos punto (:). Genera tantos apartados como hechos existan (aunque se te haya pasado un solo parrafo de hechos), con descripciones claras y detalladas.
             
             # Peticiones  // esto es un titulo obligatorio de poner
-            Incluye una lista numerada (**1.**, **2.**, **3.**, ...) en negrita solo los numeros, con tantas peticiones como el usuario indique o como resulte pertinente. Cada petición debe estar redactada de forma completa y precisa.
+            Incluye una lista numerada (**1.**, **2.**, **3.**, ... No se tiene que limitar a tres) en negrita solo los numeros, con tantas peticiones como el usuario indique o como resulte pertinente. Cada petición debe estar redactada de forma completa y precisa.
             
             # Notificaciones  // esto es un titulo obligatorio de poner
             Redacta un párrafo coherente que integre los datos de contacto para recibir notificaciones (dirección, correo electrónico y número de celular), adaptando el estilo a la información disponible.
