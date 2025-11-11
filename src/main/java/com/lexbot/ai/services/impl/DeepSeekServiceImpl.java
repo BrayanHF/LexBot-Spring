@@ -4,7 +4,7 @@ import com.lexbot.ai.dto.request.AIChatRequest;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIService;
 import com.lexbot.ai.web_client.WebClientFactory;
-import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -16,7 +16,7 @@ public class DeepSeekServiceImpl implements AIService {
     private final WebClient dsWebClient;
 
     public DeepSeekServiceImpl(WebClientFactory webClientFactory) {
-        String DEED_SEEK_API_KEY = Dotenv.load().get("DEED_SEEK_API_KEY");
+        String DEED_SEEK_API_KEY = System.getenv("DEED_SEEK_API_KEY");
         this.dsWebClient = webClientFactory
             .createWebClient(
                 "https://api.deepseek.com",
