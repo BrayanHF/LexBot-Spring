@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class ChatOrchestratorService {
 
-    public static final String LEGAL_COL_PROMPT = """
+    public String LEGAL_COL_PROMPT = """
         Eres un asistente legal especializado únicamente en el contexto jurídico colombiano.
         Debes responder con base en las leyes, normas, decretos y jurisprudencia de Colombia, actual o históricamente vigente.
         No debes referenciar ni aplicar normas de otros países bajo ninguna circunstancia.
@@ -20,6 +20,7 @@ public class ChatOrchestratorService {
         Cuando una norma tenga excepciones o condiciones especiales, explícalas también de forma accesible.
         No inventes información. Si no tienes certeza sobre un tema o norma específica, responde indicando que no puedes dar una respuesta definitiva y sugiere acudir a una entidad competente en Colombia (como una Personería, Defensoría del Pueblo, consultorio jurídico, etc.).
         Tu enfoque debe ser siempre ayudar con temas legales exclusivamente de Colombia, manteniendo la claridad, precisión y el lenguaje para todo público.
+        Se te va enviar un resumen del chat que lleva el usuario hasta el momento, si esta vacio es porque es el inico del chat.
         """;
 
 
@@ -85,28 +86,33 @@ public class ChatOrchestratorService {
         return getOrCreateChatMono
             .flatMapMany(
                 chat -> {
-                    String newChatId = chatId == null || chatId.isEmpty() ? chat.getId() : chatId;
+                    String currentChatId = chatId == null || chatId.isEmpty() ? chat.getId() : chatId;
 
-                    return generateStreamAIMessageFlux
-                        .map(
-                            iaChatResponse -> {
-                                var choice = iaChatResponse.getChoices().getFirst();
-                                if (choice.getFinish_reason() == null) {
-                                    stringBuilder.append(choice.getResponse().getContent());
-                                }
+                    return chatMessageService.getChatResume(userId, currentChatId)
+                        .flatMapMany(resume -> {
 
-                                return ChattingResponse.builder()
-                                    .chatId(newChatId)
-                                    .aiChatResponse(iaChatResponse)
-                                    .build();
-                            }
-                        )
-                        .doOnComplete(
-                            () -> {
-                                String assistantMessage = stringBuilder.toString();
-                                chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
-                            }
-                        );
+                            LEGAL_COL_PROMPT = LEGAL_COL_PROMPT + "\n\nChat summary:\n" + resume;
+                            return generateStreamAIMessageFlux
+                                .map(
+                                    iaChatResponse -> {
+                                        var choice = iaChatResponse.getChoices().getFirst();
+                                        if (choice.getFinish_reason() == null) {
+                                            stringBuilder.append(choice.getResponse().getContent());
+                                        }
+
+                                        return ChattingResponse.builder()
+                                            .chatId(currentChatId)
+                                            .aiChatResponse(iaChatResponse)
+                                            .build();
+                                    }
+                                )
+                                .doOnComplete(
+                                    () -> {
+                                        String assistantMessage = stringBuilder.toString();
+                                        chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
+                                    }
+                                );
+                        });
                 }
             );
     }
@@ -116,6 +122,5 @@ public class ChatOrchestratorService {
             .getOrCreateChat(userId, chatId, userMessage)
             .flatMap(chat -> Mono.just(chat.getId()));
     }
-
 
 }

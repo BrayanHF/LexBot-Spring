@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -44,7 +45,7 @@ public class MessageRepositoryImpl implements MessageRepository {
                     var messages = querySnapshots
                         .getDocuments()
                         .stream()
-                        .filter(document -> document != null)
+                        .filter(Objects::nonNull)
                         .map(
                             document -> {
                                 if (!document.exists()) return null;

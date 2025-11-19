@@ -21,7 +21,7 @@ public class SimpleValidation {
     }
 
     private static final Map<Class<?>, Set<String>> VALID_FIELDS_MAP = Map.of(
-        Chat.class, Set.of("title", "lastUse"),
+        Chat.class, Set.of("title", "lastUse", "resume"),
         LBUser.class, Set.of("username", "email", "password", "status")
     );
 

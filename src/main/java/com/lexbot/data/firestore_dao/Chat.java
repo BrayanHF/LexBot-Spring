@@ -20,5 +20,6 @@ public class Chat {
     private String id;
     private String title;
     private Date lastUse;
+    private String resume;
 
 }
