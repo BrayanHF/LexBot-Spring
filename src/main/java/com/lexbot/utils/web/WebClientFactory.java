@@ -1,8 +1,9 @@
-package com.lexbot.ai.web_client;
+package com.lexbot.utils.web;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
@@ -19,6 +20,11 @@ public class WebClientFactory {
             .baseUrl(baseUrl)
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .exchangeStrategies(
+                ExchangeStrategies.builder()
+                    .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                    .build()
+            )
             .build();
     }
 

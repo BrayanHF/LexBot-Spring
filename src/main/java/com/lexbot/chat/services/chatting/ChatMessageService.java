@@ -35,6 +35,11 @@ public class ChatMessageService {
             .onErrorResume(e -> Mono.error(new RuntimeException("Error creating a new chat", e)));
     }
 
+    public Mono<String> getChatResume(String userId, String chatId) {
+        return chatService.getChatById(userId, chatId)
+            .map(chat -> chat.getResume() == null ? "" : chat.getResume());
+    }
+
     public void saveMessages(String userId, String chatId, String userMessageText, String assistantMessageText) {
 
         messageService.getNextConversationIndex(userId, chatId)
@@ -66,11 +71,6 @@ public class ChatMessageService {
             })
             .subscribe();
 
-    }
-
-    public Mono<String> getChatResume(String userId, String chatId) {
-        return chatService.getChatById(userId, chatId)
-            .map(chat -> chat.getResume() == null ? "" : chat.getResume());
     }
 
     private Mono<Void> resumeChat(String userId, String chatId, String userMessage, String assistantMessage) {

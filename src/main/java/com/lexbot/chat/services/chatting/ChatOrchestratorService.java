@@ -4,6 +4,9 @@ import com.lexbot.ai.dto.AIProvider;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIServiceFactory;
 import com.lexbot.chat.dto.chat.ChattingResponse;
+import com.lexbot.search.dto.tavily.TVLSearchRequest;
+import com.lexbot.search.dto.tavily.TVLSearchResponse;
+import com.lexbot.search.services.WebSearchService;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,12 +24,14 @@ public class ChatOrchestratorService {
         No inventes información. Si no tienes certeza sobre un tema o norma específica, responde indicando que no puedes dar una respuesta definitiva y sugiere acudir a una entidad competente en Colombia (como una Personería, Defensoría del Pueblo, consultorio jurídico, etc.).
         Tu enfoque debe ser siempre ayudar con temas legales exclusivamente de Colombia, manteniendo la claridad, precisión y el lenguaje para todo público.
         Se te va enviar un resumen del chat que lleva el usuario hasta el momento, si esta vacio es porque es el inico del chat.
+        IMPORTANTE! Se va enviar toda la respuesta de una busqueda web hecha en base al mensaje del usuario, esta busqueda vendra en formato json y es de la api de tavily (esto no lo tienes que mencionar).
         """;
 
 
     private final AIServiceManager aiServiceManager;
     private final ChatMessageService chatMessageService;
     private final AIServiceFactory aiServiceFactory;
+    private final WebSearchService webSearchService;
 
     @Getter
     private AIProvider currentProvider = AIProvider.OPEN_AI;
@@ -34,11 +39,13 @@ public class ChatOrchestratorService {
     public ChatOrchestratorService(
         AIServiceManager aiServiceManager,
         ChatMessageService chatMessageService,
-        AIServiceFactory aiServiceFactory
+        AIServiceFactory aiServiceFactory,
+        WebSearchService webSearchService
     ) {
         this.aiServiceManager = aiServiceManager;
         this.chatMessageService = chatMessageService;
         this.aiServiceFactory = aiServiceFactory;
+        this.webSearchService = webSearchService;
         setAIService(currentProvider);
     }
 
@@ -81,46 +88,62 @@ public class ChatOrchestratorService {
     public Flux<ChattingResponse> chatStream(String userId, String chatId, String userMessage) {
         var getOrCreateChatMono = chatMessageService.getOrCreateChat(userId, chatId, userMessage).cache();
         var generateStreamAIMessageFlux = aiServiceManager.generateStreamAIMessage(userMessage, LEGAL_COL_PROMPT);
+        var tvlSearchRequestMono = userMessageWebSearch(userMessage);
 
         var stringBuilder = new StringBuilder();
-        return getOrCreateChatMono
-            .flatMapMany(
-                chat -> {
-                    String currentChatId = chatId == null || chatId.isEmpty() ? chat.getId() : chatId;
+        return Mono.zip(
+            getOrCreateChatMono,
+            tvlSearchRequestMono
+        ).flatMapMany(
+            tuple -> {
 
-                    return chatMessageService.getChatResume(userId, currentChatId)
-                        .flatMapMany(resume -> {
+                String currentChatId = chatId == null || chatId.isEmpty() ? tuple.getT1().getId() : chatId;
 
-                            LEGAL_COL_PROMPT = LEGAL_COL_PROMPT + "\n\nChat summary:\n" + resume;
-                            return generateStreamAIMessageFlux
-                                .map(
-                                    iaChatResponse -> {
-                                        var choice = iaChatResponse.getChoices().getFirst();
-                                        if (choice.getFinish_reason() == null) {
-                                            stringBuilder.append(choice.getResponse().getContent());
-                                        }
+                return chatMessageService.getChatResume(userId, currentChatId)
+                    .flatMapMany(resume -> {
 
-                                        return ChattingResponse.builder()
-                                            .chatId(currentChatId)
-                                            .aiChatResponse(iaChatResponse)
-                                            .build();
+                        LEGAL_COL_PROMPT = LEGAL_COL_PROMPT + "\n\nResumen del chat:\n" + resume + "\n\nBusqueda web del mensaje del usuario:\n" + tuple.getT2();
+
+                        return generateStreamAIMessageFlux
+                            .map(
+                                iaChatResponse -> {
+                                    var choice = iaChatResponse.getChoices().getFirst();
+                                    if (choice.getFinish_reason() == null) {
+                                        stringBuilder.append(choice.getResponse().getContent());
                                     }
-                                )
-                                .doOnComplete(
-                                    () -> {
-                                        String assistantMessage = stringBuilder.toString();
-                                        chatMessageService.saveMessages(userId, chat.getId(), userMessage, assistantMessage);
-                                    }
-                                );
-                        });
-                }
-            );
+
+                                    return ChattingResponse.builder()
+                                        .chatId(currentChatId)
+                                        .aiChatResponse(iaChatResponse)
+                                        .build();
+                                }
+                            )
+                            .doOnComplete(
+                                () -> {
+                                    String assistantMessage = stringBuilder.toString();
+                                    chatMessageService.saveMessages(userId, currentChatId, userMessage, assistantMessage);
+                                }
+                            );
+                    });
+            }
+        );
     }
 
     public Mono<String> newChat(String userId, String chatId, String userMessage) {
         return chatMessageService
             .getOrCreateChat(userId, chatId, userMessage)
             .flatMap(chat -> Mono.just(chat.getId()));
+    }
+
+    private Mono<TVLSearchResponse> userMessageWebSearch(String userMessage) {
+        TVLSearchRequest request = TVLSearchRequest.builder()
+            .query(userMessage)
+            .country("colombia")
+            .search_depth("advanced")
+            .include_raw_content(true)
+            .build();
+
+        return webSearchService.search(request);
     }
 
 }
