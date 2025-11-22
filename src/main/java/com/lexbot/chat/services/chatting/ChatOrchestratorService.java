@@ -34,7 +34,7 @@ public class ChatOrchestratorService {
     private final WebSearchService webSearchService;
 
     @Getter
-    private AIProvider currentProvider = AIProvider.OPEN_AI;
+    private AIProvider currentProvider = AIProvider.DEEP_SEEK;
 
     public ChatOrchestratorService(
         AIServiceManager aiServiceManager,
@@ -108,8 +108,9 @@ public class ChatOrchestratorService {
                             .map(
                                 iaChatResponse -> {
                                     var choice = iaChatResponse.getChoices().getFirst();
+                                    var content = choice.getResponse().getContent() == null ? "" : choice.getResponse().getContent();
                                     if (choice.getFinish_reason() == null) {
-                                        stringBuilder.append(choice.getResponse().getContent());
+                                        stringBuilder.append(content);
                                     }
 
                                     return ChattingResponse.builder()

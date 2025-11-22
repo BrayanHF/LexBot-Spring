@@ -5,8 +5,6 @@ import com.lexbot.ai.dto.request.AIChatRequest;
 import com.lexbot.ai.dto.request.AIMessageRequest;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIService;
-import com.lexbot.ai.services.impl.DeepSeekServiceImpl;
-import com.lexbot.ai.services.impl.OpenAIServiceImpl;
 import com.lexbot.data.services.ChatService;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -20,10 +18,8 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    private static final int DEFAULT_TEMPERATURE = 1;
-    private static final int TEMPERATURE_FOR_UNLIMITED = 1;
+    private static final double DEFAULT_TEMPERATURE = 1.0;
     private static final int MAX_TOKENS_CHAT_LIMITED = 5000;
-    private static final int MAX_TOKENS_CHAT_UNLIMITED = 5000;
     private static final int MAX_TOKENS_TITLE = 100;
 
     private final ChatService chatService;
@@ -35,22 +31,7 @@ public class AIServiceManager {
     @Setter
     private AIService aiService;
 
-    private String getModel() {
-        switch (aiService) {
-            case null -> throw new NullPointerException("AI service is null");
-
-            case OpenAIServiceImpl ignored -> {
-                return "gpt-4o-mini";
-            }
-            case DeepSeekServiceImpl ignored -> {
-                return "deepseek-chat";
-            }
-
-            default -> throw new IllegalArgumentException("AI service not implemented yet");
-        }
-    }
-
-    private AIChatRequest getAIChatRequest(String message, String prompt, boolean limited, int temperature) {
+    private AIChatRequest getAIChatRequest(String message, String prompt, boolean limited) {
 
         var userMessage = AIMessageRequest.builder()
             .role(Role.USER)
@@ -58,30 +39,35 @@ public class AIServiceManager {
             .build();
 
         var systemMessage = AIMessageRequest.builder()
-            .role(Role.DEVELOPER)
+            .role(Role.SYSTEM)
             .content(prompt)
             .build();
 
-        return AIChatRequest.builder()
-            .model(getModel())
+        AIChatRequest request = AIChatRequest.builder()
             .messages(List.of(systemMessage, userMessage))
-            .temperature(temperature)
-            .max_tokens(limited ? MAX_TOKENS_CHAT_LIMITED : MAX_TOKENS_CHAT_UNLIMITED)
+            .stream(false)
             .build();
+
+        if (limited) {
+            request.setTemperature(DEFAULT_TEMPERATURE);
+            request.setMax_tokens(MAX_TOKENS_CHAT_LIMITED);
+        }
+
+        return request;
     }
 
     public Mono<AIChatResponse> generateAIMessageLimited(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt, true, DEFAULT_TEMPERATURE);
+        var chatRequest = getAIChatRequest(message, prompt, true);
         return aiService.chat(chatRequest);
     }
 
     public Mono<AIChatResponse> generateAIMessageUnlimited(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt, false, TEMPERATURE_FOR_UNLIMITED);
+        var chatRequest = getAIChatRequest(message, prompt, false);
         return aiService.chat(chatRequest);
     }
 
     public Flux<AIChatResponse> generateStreamAIMessage(String message, String prompt) {
-        var chatRequest = getAIChatRequest(message, prompt, false, DEFAULT_TEMPERATURE);
+        var chatRequest = getAIChatRequest(message, prompt, false);
         return aiService.chatStream(chatRequest);
     }
 
@@ -96,7 +82,6 @@ public class AIServiceManager {
             .build();
 
         var aiChatRequest = AIChatRequest.builder()
-            .model(getModel())
             .messages(List.of(userMessage))
             .temperature(DEFAULT_TEMPERATURE)
             .max_tokens(MAX_TOKENS_TITLE)
