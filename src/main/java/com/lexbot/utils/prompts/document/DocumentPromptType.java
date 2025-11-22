@@ -1,6 +1,6 @@
-package com.lexbot.chat.services.generate.text;
+package com.lexbot.utils.prompts.document;
 
-public enum PromptType {
+public enum DocumentPromptType {
     VALIDATE_ANSWER_RIGHT_PETITION,
     VALIDATE_ANSWER_COMPLAINT,
     VALIDATE_ANSWER_SPECIAL_POWER,

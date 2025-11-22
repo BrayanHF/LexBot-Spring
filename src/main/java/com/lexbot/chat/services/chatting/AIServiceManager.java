@@ -6,6 +6,7 @@ import com.lexbot.ai.dto.request.AIMessageRequest;
 import com.lexbot.ai.dto.response.AIChatResponse;
 import com.lexbot.ai.services.AIService;
 import com.lexbot.data.services.ChatService;
+import com.lexbot.utils.prompts.chat.ChatPrompt;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,7 +21,6 @@ public class AIServiceManager {
 
     private static final double DEFAULT_TEMPERATURE = 1.0;
     private static final int MAX_TOKENS_CHAT_LIMITED = 5000;
-    private static final int MAX_TOKENS_TITLE = 100;
 
     private final ChatService chatService;
 
@@ -45,7 +45,6 @@ public class AIServiceManager {
 
         AIChatRequest request = AIChatRequest.builder()
             .messages(List.of(systemMessage, userMessage))
-            .stream(false)
             .build();
 
         if (limited) {
@@ -73,19 +72,7 @@ public class AIServiceManager {
 
     public void generateTitleForChat(String userId, String chatId, String message) {
 
-        String prompt = "Dame un título muy corto del siguiente mensaje (no uses comillas): " + message;
-
-
-        var userMessage = AIMessageRequest.builder()
-            .role(Role.USER)
-            .content(prompt)
-            .build();
-
-        var aiChatRequest = AIChatRequest.builder()
-            .messages(List.of(userMessage))
-            .temperature(DEFAULT_TEMPERATURE)
-            .max_tokens(MAX_TOKENS_TITLE)
-            .build();
+        var aiChatRequest = getAIChatRequest(message, ChatPrompt.CHAT_TITLE_PROMPT, true);
 
         aiService.chat(aiChatRequest)
             .map(AIChatResponse -> AIChatResponse.getChoices().getFirst().getResponse().getContent())

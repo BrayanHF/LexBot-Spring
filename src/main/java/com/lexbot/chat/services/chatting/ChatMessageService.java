@@ -5,6 +5,7 @@ import com.lexbot.data.firestore_dao.Chat;
 import com.lexbot.data.firestore_dao.Message;
 import com.lexbot.data.services.ChatService;
 import com.lexbot.data.services.MessageService;
+import com.lexbot.utils.prompts.chat.ChatPrompt;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -78,20 +79,6 @@ public class ChatMessageService {
         return getChatResume(userId, chatId)
             .flatMap(chatResume -> {
 
-
-                String prompt = """
-                    You are a system responsible for maintaining a compact memory of the entire conversation.
-                    
-                    Your task: Produce an updated, concise summary of the chat that your api will consume in the next user interaction.
-                    
-                    Rules for the summary:
-                    - Keep essential facts, user goals, preferences, decisions, or constraints.
-                    - Do NOT store irrelevant small talk.
-                    - Avoid unnecessary details, timestamps, or direct quotes.
-                    - Summaries must remain short but meaningful.
-                    - Respond ONLY with the updated summary.
-                    """;
-
                 String messageToChat = """
                     Existing summary:
                     %s
@@ -109,7 +96,7 @@ public class ChatMessageService {
                     assistantMessage
                 );
 
-                return aiServiceManager.generateAIMessageUnlimited(messageToChat, prompt)
+                return aiServiceManager.generateAIMessageUnlimited(messageToChat, ChatPrompt.CHAT_RESUME_PROMPT)
                     .flatMap(aiChatResponse ->
                         chatService.updateChatByFields(userId, chatId, Map.of("resume", aiChatResponse.getChoices().getFirst().getResponse().getContent()))
                     );

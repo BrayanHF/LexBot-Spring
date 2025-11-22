@@ -28,7 +28,7 @@ public class LBUserController {
                 ApiResponse.success(true, false)
             )
             .onErrorResume(e -> Mono.just(
-                ApiResponse.error("Could not create user: " + e.getMessage(), false)
+                ApiResponse.error("No fue posible crear el usuario en este momento. Por favor intenta nuevamente.", false)
             ));
     }
 

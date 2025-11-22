@@ -37,7 +37,10 @@ public class AIProviderController {
                 return Mono.just(
                     "Proveedor de IA cambiado exitosamente a: " + request.provider()
                 );
-            });
+            })
+            .onErrorResume(e -> Mono.just(
+                "El proveedor de IA seleccionado no está disponible. Por favor elige uno de los proveedores permitidos."
+            ));
     }
 
     @GetMapping("current")
@@ -47,4 +50,3 @@ public class AIProviderController {
     }
 
 }
-

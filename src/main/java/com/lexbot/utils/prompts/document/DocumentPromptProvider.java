@@ -1,10 +1,13 @@
-package com.lexbot.chat.services.generate.text;
+package com.lexbot.utils.prompts.document;
+
+import com.lexbot.chat.services.generate.text.DocumentType;
 
 import java.util.Map;
 
-public class PromptProvider {
-    private static final Map<PromptType, String> PROMPTS = Map.of(
-        PromptType.VALIDATE_ANSWER_RIGHT_PETITION, """
+public class DocumentPromptProvider {
+
+    private static final Map<DocumentPromptType, String> PROMPTS = Map.of(
+        DocumentPromptType.VALIDATE_ANSWER_RIGHT_PETITION, """
             Eres un asistente que valida respuestas para un formulario de Derecho de Petición en Colombia.
             Responde únicamente en formato JSON con estas propiedades:
             - error (string | null): mensaje de error si la respuesta no es válida, ambigua o insuficiente.
@@ -28,7 +31,7 @@ public class PromptProvider {
             }
             """,
 
-        PromptType.VALIDATE_ANSWER_COMPLAINT, """
+        DocumentPromptType.VALIDATE_ANSWER_COMPLAINT, """
             Eres un asistente que valida respuestas para un formulario de Querella en Colombia.
             Responde únicamente en formato JSON con estas propiedades:
             - error (string | null): mensaje de error si la respuesta no es válida, insuficiente o ambigua.
@@ -53,7 +56,7 @@ public class PromptProvider {
             }
             """,
 
-        PromptType.VALIDATE_ANSWER_SPECIAL_POWER, """
+        DocumentPromptType.VALIDATE_ANSWER_SPECIAL_POWER, """
             Eres un asistente que valida respuestas para un formulario de poder especial en Colombia.
             Responde únicamente en formato JSON con estas propiedades:
             - error (string | null): mensaje de error si la respuesta no es válida, ambigua o insuficiente para un documento legal de poder.
@@ -76,7 +79,7 @@ public class PromptProvider {
             }
             """,
 
-        PromptType.VALIDATE_ANSWER_HABEAS_DATA, """
+        DocumentPromptType.VALIDATE_ANSWER_HABEAS_DATA, """
             Eres un asistente que valida respuestas para un formulario de derecho de hábeas data en Colombia.
             Responde únicamente en formato JSON con estas propiedades:
             - error (string | null): mensaje de error si la respuesta no es válida, ambigua o demasiado general para una solicitud efectiva.
@@ -99,7 +102,7 @@ public class PromptProvider {
             }
             """,
 
-        PromptType.RIGHT_PETITION, """
+        DocumentPromptType.RIGHT_PETITION, """
             Eres un asistente que genera un Derecho de Petición en Colombia. Responde en **Markdown** limpio y profesional, siguiendo estos lineamientos:
             
             ⚠️ ATENCIÓN: Las siguientes reglas son CRÍTICAS y deben cumplirse al 100%. Si alguna se incumple, la salida será inválida.  
@@ -149,7 +152,7 @@ public class PromptProvider {
             {AbreviaturaTipoDocumento}. {NúmeroDocumento} de {CiudadExpedición}
             """,
 
-        PromptType.COMPLAINT, """
+        DocumentPromptType.COMPLAINT, """
             Eres un asistente experto en redacción de querellas en Colombia. Responde en **Markdown** siguiendo estos lineamientos para generar una Querella al usuario:
             
             ⚠️ ATENCIÓN: Las siguientes instrucciones son CRÍTICAS y deben cumplirse al 100%. Si alguna se incumple, la salida será inválida.
@@ -246,7 +249,7 @@ public class PromptProvider {
             {AbreviaturaTipoDocumento}. {NúmeroDocumento} de {CiudadExpedición}  
             """,
 
-        PromptType.SPECIAL_POWER, """
+        DocumentPromptType.SPECIAL_POWER, """
             Eres un asistente que genera un Poder Especial en Colombia. Responde en **Markdown** limpio y profesional, siguiendo estos lineamientos:
             
             ⚠️ ATENCIÓN: Las siguientes reglas son CRÍTICAS y deben cumplirse al 100%. Si alguna se incumple, la salida será inválida.  
@@ -292,7 +295,7 @@ public class PromptProvider {
             """,
 
 
-        PromptType.HABEAS_DATA, """
+        DocumentPromptType.HABEAS_DATA, """
             Eres un asistente que genera una solicitud de Hábeas Data en Colombia. Responde en **Markdown** limpio y profesional, siguiendo estos lineamientos:
             
             ⚠️ ATENCIÓN: Las siguientes reglas son CRÍTICAS y deben cumplirse al 100%. Si alguna se incumple, la salida será inválida.  
@@ -347,16 +350,16 @@ public class PromptProvider {
 
     );
 
-    public static String getPrompt(PromptType type) {
+    public static String getPrompt(DocumentPromptType type) {
         return PROMPTS.get(type);
     }
 
     public static String getPrompt(DocumentType type) {
         return switch (type) {
-            case RIGHT_PETITION -> PROMPTS.get(PromptType.RIGHT_PETITION);
-            case COMPLAINT -> PROMPTS.get(PromptType.COMPLAINT);
-            case SPECIAL_POWER -> PROMPTS.get(PromptType.SPECIAL_POWER);
-            case HABEAS_DATA -> PROMPTS.get(PromptType.HABEAS_DATA);
+            case RIGHT_PETITION -> PROMPTS.get(DocumentPromptType.RIGHT_PETITION);
+            case COMPLAINT -> PROMPTS.get(DocumentPromptType.COMPLAINT);
+            case SPECIAL_POWER -> PROMPTS.get(DocumentPromptType.SPECIAL_POWER);
+            case HABEAS_DATA -> PROMPTS.get(DocumentPromptType.HABEAS_DATA);
         };
     }
 

@@ -22,8 +22,7 @@ public class MessageController {
         return messageService
             .chatMessages(authentication.getName(), chatId)
             .map(messages -> ApiResponse.success(messages, false))
-            .switchIfEmpty(Mono.just(ApiResponse.error("No messages found", false)))
-            .onErrorResume(e -> Mono.just(ApiResponse.error("Error fetching messages: " + e.getMessage(), false)));
+            .onErrorResume(e -> Mono.just(ApiResponse.error("No se pudieron obtener los mensajes en este momento. Por favor intenta nuevamente.", false)));
     }
 
 }

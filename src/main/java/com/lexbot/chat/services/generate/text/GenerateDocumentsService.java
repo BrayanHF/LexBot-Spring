@@ -9,6 +9,8 @@ import com.lexbot.chat.dto.generate.QuestionAnswer;
 import com.lexbot.chat.dto.generate.ValidatedAnswer;
 import com.lexbot.chat.services.chatting.AIServiceManager;
 import com.lexbot.chat.services.generate.pdf.MarkdownPdfService;
+import com.lexbot.utils.prompts.document.DocumentPromptProvider;
+import com.lexbot.utils.prompts.document.DocumentPromptType;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -35,14 +37,14 @@ public class GenerateDocumentsService {
         aiServiceManager.setAiService(aiService);
     }
 
-    public Mono<ValidatedAnswer> validateAnswer(QuestionAnswer qa, PromptType promptType) {
+    public Mono<ValidatedAnswer> validateAnswer(QuestionAnswer qa, DocumentPromptType documentPromptType) {
 
         String userMessage = "Pregunta: " + qa.getQuestion() +
             "\nRespuesta: " + qa.getAnswer() +
             "\nValida si la respuesta dada tiene sentido y responde correctamente a la pregunta hecha, no ser estrictos con la ortografia";
 
 
-        return aiServiceManager.generateAIMessageLimited(userMessage, PromptProvider.getPrompt(promptType))
+        return aiServiceManager.generateAIMessageLimited(userMessage, DocumentPromptProvider.getPrompt(documentPromptType))
             .map(aiChatResponse -> {
                 String json = aiChatResponse.getChoices().getFirst().getResponse().getContent();
 
@@ -59,7 +61,7 @@ public class GenerateDocumentsService {
 
     public Mono<byte[]> generateDocument(BaseLegalRequest request, DocumentType documentType) throws JsonProcessingException {
         String json = mapper.writeValueAsString(request);
-        return aiServiceManager.generateAIMessageUnlimited(json, PromptProvider.getPrompt(documentType))
+        return aiServiceManager.generateAIMessageUnlimited(json, DocumentPromptProvider.getPrompt(documentType))
             .map(res -> {
                     String textMarkDown = res.getChoices().getFirst().getResponse().getContent();
                     return markdownPdfService.generatePdfFromMarkdown(textMarkDown);

@@ -3,7 +3,7 @@ package com.lexbot.chat.controllers;
 import com.lexbot.chat.dto.generate.*;
 import com.lexbot.chat.services.generate.text.DocumentType;
 import com.lexbot.chat.services.generate.text.GenerateDocumentsService;
-import com.lexbot.chat.services.generate.text.PromptType;
+import com.lexbot.utils.prompts.document.DocumentPromptType;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,24 +21,26 @@ public class DocumentGeneratorController {
 
     private GenerateDocumentsService generateDocumentsService;
 
+    //TODO: Error messages
+
     @PostMapping("validate-answer/right-petition")
     public Mono<ValidatedAnswer> validateAnswerRightPetition(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, PromptType.VALIDATE_ANSWER_RIGHT_PETITION);
+        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_RIGHT_PETITION);
     }
 
     @PostMapping("validate-answer/complaint")
     public Mono<ValidatedAnswer> validateAnswerComplaint(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, PromptType.VALIDATE_ANSWER_COMPLAINT);
+        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_COMPLAINT);
     }
 
     @PostMapping("validate-answer/power-of-attorney")
     public Mono<ValidatedAnswer> validateAnswerSpecialPower(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, PromptType.VALIDATE_ANSWER_SPECIAL_POWER);
+        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_SPECIAL_POWER);
     }
 
     @PostMapping("validate-answer/habeas-data")
     public Mono<ValidatedAnswer> validateAnswerHabeasData(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, PromptType.VALIDATE_ANSWER_HABEAS_DATA);
+        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_HABEAS_DATA);
     }
 
     @PostMapping("right-petition")

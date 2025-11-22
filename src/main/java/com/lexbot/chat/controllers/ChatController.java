@@ -24,7 +24,7 @@ public class ChatController {
         return chatService
             .userChats(authentication.getName())
             .map(userChats -> ApiResponse.success(userChats, false))
-            .onErrorResume(e -> Mono.just(ApiResponse.error(e.getMessage(), false)));
+            .onErrorResume(e -> Mono.just(ApiResponse.error("No se pudo obtener la información de los chats en este momento.", false)));
     }
 
     @GetMapping("chat-id/{chatId}")
@@ -32,7 +32,7 @@ public class ChatController {
         return chatService
             .getChatById(authentication.getName(), chatId)
             .map(chat -> ApiResponse.success(chat, false))
-            .onErrorResume(e -> Mono.just(ApiResponse.error(e.getMessage(), false)));
+            .onErrorResume(e -> Mono.just(ApiResponse.error("No fue posible cargar los datos del chat solicitado.", false)));
     }
 
     @PatchMapping
@@ -40,7 +40,7 @@ public class ChatController {
         return chatService
             .updateChatByFields(authentication.getName(), request.getChatId(), request.getUpdates())
             .map(response -> ApiResponse.success(response, false))
-            .onErrorResume(e -> Mono.just(ApiResponse.error("Error updating chat: " + e.getMessage(), false)));
+            .onErrorResume(e -> Mono.just(ApiResponse.error("Ocurrió un error al actualizar el chat. Inténtalo nuevamente.", false)));
     }
 
     @DeleteMapping("chat-id/{chatId}")
@@ -48,7 +48,7 @@ public class ChatController {
         return chatService
             .deleteChatById(authentication.getName(), chatId)
             .thenReturn(ApiResponse.success(true, false))
-            .onErrorResume(e -> Mono.just(ApiResponse.error("Error deleting chat: " + e.getMessage(), false)));
+            .onErrorResume(e -> Mono.just(ApiResponse.error("No se pudo eliminar el chat. Por favor intenta de nuevo.", false)));
     }
 
 }
