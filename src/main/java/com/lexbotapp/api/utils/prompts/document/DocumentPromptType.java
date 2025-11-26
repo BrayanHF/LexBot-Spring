@@ -1,0 +1,13 @@
+package com.lexbotapp.api.utils.prompts.document;
+
+public enum DocumentPromptType {
+    VALIDATE_ANSWER_RIGHT_PETITION,
+    VALIDATE_ANSWER_COMPLAINT,
+    VALIDATE_ANSWER_SPECIAL_POWER,
+    VALIDATE_ANSWER_HABEAS_DATA,
+    RIGHT_PETITION,
+    COMPLAINT,
+    SPECIAL_POWER,
+    HABEAS_DATA
+}
+
