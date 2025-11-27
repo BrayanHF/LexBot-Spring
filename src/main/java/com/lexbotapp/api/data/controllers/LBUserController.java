@@ -15,6 +15,13 @@ public class LBUserController {
 
     private LBUserService lbUserService;
 
+    @PostMapping("exists")
+    public Mono<ApiResponse<Boolean>> getUserById(@RequestBody String uid) {
+        return lbUserService.getUserById(uid)
+            .map(lbUser -> ApiResponse.success(true, false))
+            .onErrorResume(e -> Mono.just(ApiResponse.error("User not found", false)));
+    }
+
     @PostMapping("new")
     public Mono<ApiResponse<Boolean>> newLBUser(
         @RequestBody LBUser lbUser,
