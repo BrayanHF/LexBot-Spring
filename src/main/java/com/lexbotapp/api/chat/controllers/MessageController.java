@@ -5,7 +5,10 @@ import com.lexbotapp.api.data.firestore_dao.Message;
 import com.lexbotapp.api.data.services.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -22,7 +25,18 @@ public class MessageController {
         return messageService
             .chatMessages(authentication.getName(), chatId)
             .map(messages -> ApiResponse.success(messages, false))
-            .onErrorResume(e -> Mono.just(ApiResponse.error("No se pudieron obtener los mensajes en este momento. Por favor intenta nuevamente.", false)));
+            .onErrorResume(e -> {
+                if ("chat not found".equals(e.getMessage())) {
+                    return Mono.just(ApiResponse.error(
+                        "Este chat no existe o fue eliminado",
+                        false
+                    ));
+                }
+                return Mono.just(ApiResponse.error(
+                    "No se pudieron obtener los mensajes en este momento. Por favor intenta nuevamente",
+                    false
+                ));
+            });
     }
 
 }
