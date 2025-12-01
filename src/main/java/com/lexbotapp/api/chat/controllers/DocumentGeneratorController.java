@@ -26,22 +26,30 @@ public class DocumentGeneratorController {
 
     @PostMapping("validate-answer/right-petition")
     public Mono<ValidatedAnswer> validateAnswerRightPetition(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_RIGHT_PETITION);
+        return generateDocumentsService
+            .validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_RIGHT_PETITION)
+            .onErrorResume(e -> handleErrorAnswer());
     }
 
     @PostMapping("validate-answer/complaint")
     public Mono<ValidatedAnswer> validateAnswerComplaint(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_COMPLAINT);
+        return generateDocumentsService
+            .validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_COMPLAINT)
+            .onErrorResume(e -> handleErrorAnswer());
     }
 
     @PostMapping("validate-answer/power-of-attorney")
     public Mono<ValidatedAnswer> validateAnswerSpecialPower(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_SPECIAL_POWER);
+        return generateDocumentsService
+            .validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_SPECIAL_POWER)
+            .onErrorResume(e -> handleErrorAnswer());
     }
 
     @PostMapping("validate-answer/habeas-data")
     public Mono<ValidatedAnswer> validateAnswerHabeasData(@RequestBody QuestionAnswer questionAnswer) {
-        return generateDocumentsService.validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_HABEAS_DATA);
+        return generateDocumentsService
+            .validateAnswer(questionAnswer, DocumentPromptType.VALIDATE_ANSWER_HABEAS_DATA)
+            .onErrorResume(e -> handleErrorAnswer());
     }
 
     @PostMapping("right-petition")
@@ -92,6 +100,13 @@ public class DocumentGeneratorController {
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(errorMessage.getBytes(StandardCharsets.UTF_8))
         );
+    }
+
+    private Mono<ValidatedAnswer> handleErrorAnswer() {
+        var validatedAnswer = new ValidatedAnswer();
+        validatedAnswer.setError(null);
+        validatedAnswer.setResult(null);
+        return Mono.just(validatedAnswer);
     }
 
 }

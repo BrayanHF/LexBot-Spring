@@ -53,7 +53,7 @@ public class GenerateDocumentsService {
             Pregunta:
             %s
             
-            Respuesta:
+            Respuesta:ValidatedAnswer
             %s
             
             Valida si la respuesta dada tiene sentido y responde correctamente a la pregunta hecha, no ser estrictos con la ortografia"
@@ -63,16 +63,13 @@ public class GenerateDocumentsService {
         );
 
         return aiServiceManager.generateAIMessageLimited(userMessage, DocumentPromptProvider.getPrompt(documentPromptType))
-            .map(aiChatResponse -> {
+            .handle((aiChatResponse, sink) -> {
                 String response = aiChatResponse.getChoices().getFirst().getResponse().getContent();
 
                 try {
-                    return ValidatedAnswer.parse(response);
+                    sink.next(ValidatedAnswer.parse(response));
                 } catch (Exception e) {
-                    var validatedAnswer = new ValidatedAnswer();
-                    validatedAnswer.setError(null);
-                    validatedAnswer.setResult(null);
-                    return validatedAnswer;
+                    sink.error(new RuntimeException(e));
                 }
             });
     }
@@ -96,7 +93,7 @@ public class GenerateDocumentsService {
                     }
 
                     String toSent = """
-                        Peticion del usuario:
+                        Documento pedido por el usuario:
                         %s
                         
                         Busquedas webs:
@@ -113,7 +110,7 @@ public class GenerateDocumentsService {
                             }
                         );
                 }
-            ).onErrorResume(e -> Mono.just(new byte[0]));
+            );
     }
 
     private Mono<List<TVLSearchResponse>> search(String json) {
