@@ -2,6 +2,7 @@ package com.lexbotapp.api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -21,7 +22,11 @@ public class SecurityConfig {
         return http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .cors(corsSpec -> corsSpec.configurationSource(corsConfigurationSource()))
-            .authorizeExchange(exchange -> exchange.anyExchange().authenticated())
+            .authorizeExchange(exchange -> exchange
+                .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                .pathMatchers( "/", "/health").permitAll()
+                .anyExchange().authenticated()
+            )
             .addFilterBefore(firebaseAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build();
     }
