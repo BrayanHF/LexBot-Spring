@@ -1,5 +1,6 @@
 package com.lexbotapp.api.chat.services.chatting;
 
+import com.lexbotapp.api.ai.dto.AIProvider;
 import com.lexbotapp.api.ai.dto.Role;
 import com.lexbotapp.api.ai.dto.request.AIChatRequest;
 import com.lexbotapp.api.ai.dto.request.AIMessageRequest;
@@ -19,17 +20,34 @@ import java.util.Map;
 @Service
 public class AIServiceManager {
 
-    private static final double DEFAULT_TEMPERATURE = 1.0;
-    private static final int MAX_TOKENS_CHAT_LIMITED = 10000;
 
     private final ChatService chatService;
-
-    public AIServiceManager(ChatService chatService) {
-        this.chatService = chatService;
-    }
+    private final AIProviderState aiProviderState;
 
     @Setter
     private AIService aiService;
+
+    public AIServiceManager(
+        ChatService chatService,
+        AIProviderState aiProviderState
+    ) {
+        this.chatService = chatService;
+        this.aiProviderState = aiProviderState;
+    }
+
+    public String getAiModel(AIProvider aiProvider, boolean limited) {
+        if (limited) {
+            return switch (aiProvider) {
+                case OPEN_AI -> "gpt-5-nano";
+                case DEEP_SEEK -> "deepseek-chat";
+            };
+        }
+
+        return switch (aiProvider) {
+            case OPEN_AI -> "gpt-5.1";
+            case DEEP_SEEK -> "deepseek-reasoner";
+        };
+    }
 
     private AIChatRequest getAIChatRequest(String message, String prompt, boolean limited) {
 
@@ -43,16 +61,12 @@ public class AIServiceManager {
             .content(prompt)
             .build();
 
-        AIChatRequest request = AIChatRequest.builder()
+        var provider = getAiModel(aiProviderState.getCurrentProvider(), limited);
+        return AIChatRequest.builder()
             .messages(List.of(systemMessage, userMessage))
+            .model(provider)
+            .stream(false)
             .build();
-
-        if (limited) {
-            request.setTemperature(DEFAULT_TEMPERATURE);
-            request.setMax_tokens(MAX_TOKENS_CHAT_LIMITED);
-        }
-
-        return request;
     }
 
     public Mono<AIChatResponse> generateAIMessageLimited(String message, String prompt) {

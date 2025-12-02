@@ -8,7 +8,6 @@ import com.lexbotapp.api.search.dto.tavily.TVLSearchRequest;
 import com.lexbotapp.api.search.dto.tavily.TVLSearchResponse;
 import com.lexbotapp.api.search.services.WebSearchService;
 import com.lexbotapp.api.utils.prompts.chat.ChatPrompt;
-import lombok.Getter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,31 +19,26 @@ public class ChatOrchestratorService {
     private final ChatMessageService chatMessageService;
     private final AIServiceFactory aiServiceFactory;
     private final WebSearchService webSearchService;
-
-    @Getter
-    private AIProvider currentProvider = AIProvider.DEEP_SEEK;
+    private final AIProviderState aiProviderState;
 
     public ChatOrchestratorService(
         AIServiceManager aiServiceManager,
         ChatMessageService chatMessageService,
         AIServiceFactory aiServiceFactory,
-        WebSearchService webSearchService
+        WebSearchService webSearchService, AIProviderState aiProviderState
     ) {
         this.aiServiceManager = aiServiceManager;
         this.chatMessageService = chatMessageService;
         this.aiServiceFactory = aiServiceFactory;
         this.webSearchService = webSearchService;
-        setAIService(currentProvider);
+        this.aiProviderState = aiProviderState;
+        setAIService(aiProviderState.getCurrentProvider());
     }
 
-    private void setAIService(AIProvider provider) {
+    public void setAIService(AIProvider provider) {
+        aiProviderState.setCurrentProvider(provider);
         var aiService = aiServiceFactory.getAIService(provider);
         aiServiceManager.setAiService(aiService);
-        this.currentProvider = provider;
-    }
-
-    public void changeAIProvider(AIProvider newProvider) {
-        setAIService(newProvider);
     }
 
     public Mono<ChattingResponse> chat(String userId, String chatId, String userMessage) {

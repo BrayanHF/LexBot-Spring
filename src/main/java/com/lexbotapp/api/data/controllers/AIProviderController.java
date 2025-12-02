@@ -1,7 +1,7 @@
 package com.lexbotapp.api.data.controllers;
 
 import com.lexbotapp.api.ai.dto.AIProvider;
-import com.lexbotapp.api.chat.services.chatting.ChatOrchestratorService;
+import com.lexbotapp.api.chat.services.chatting.AIProviderState;
 import com.lexbotapp.api.data.firestore_dao.ChangeAIProviderRequest;
 import com.lexbotapp.api.data.firestore_dao.LBUserStatus;
 import com.lexbotapp.api.data.services.LBUserService;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AIProviderController {
 
-    private final ChatOrchestratorService chatOrchestratorService;
+    private final AIProviderState aiProviderState;
     private final LBUserService userService;
 
     @PostMapping("change")
@@ -33,7 +33,7 @@ public class AIProviderController {
                     ));
                 }
 
-                chatOrchestratorService.changeAIProvider(request.provider());
+                aiProviderState.setCurrentProvider(request.provider());
                 return Mono.just(
                     "Proveedor de IA cambiado exitosamente a: " + request.provider()
                 );
@@ -45,7 +45,7 @@ public class AIProviderController {
 
     @GetMapping("current")
     public Mono<String> getCurrentProvider() {
-        AIProvider current = chatOrchestratorService.getCurrentProvider();
+        AIProvider current = aiProviderState.getCurrentProvider();
         return Mono.just("Proveedor actual: " + current.name());
     }
 

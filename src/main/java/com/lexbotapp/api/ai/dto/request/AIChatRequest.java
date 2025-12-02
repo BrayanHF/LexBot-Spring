@@ -11,6 +11,7 @@ import java.util.List;
 public class AIChatRequest {
 
     private String model;
+
     private List<AIMessageRequest> messages;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

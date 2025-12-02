@@ -35,14 +35,12 @@ public class DeepSeekServiceImpl implements AIService {
     @Override
     public Mono<AIChatResponse> chat(AIChatRequest request) {
         request.setStream(false);
-        request.setModel("deepseek-reasoner");
         return dsRequest(request).bodyToMono(AIChatResponse.class);
     }
 
     @Override
     public Flux<AIChatResponse> chatStream(AIChatRequest request) {
         request.setStream(true);
-        request.setModel("deepseek-reasoner");
         return dsRequest(request)
             .bodyToFlux(AIChatResponse.class)
             .takeUntil(response -> response.getChoices().getFirst().getFinish_reason() != null);
